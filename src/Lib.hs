@@ -20,6 +20,11 @@ doesConnect
     => (Suit, Bool) -> (Suit, Bool) -> f ()
 doesConnect a b = guard $ canConnect a b
 
+-- Lazy naming - sorry! In my defense, this is a quick lunchtime hack
+-- and lunchtime is overrunning because of it!
+--
+-- tl is "top-left", mm is "middle-middle", etc.
+-- otl is "original, unrotated top left", etc.
 solution :: Logic Solution
 solution = do
     otl <- choices pieces
@@ -68,7 +73,7 @@ solve = do
     mapM_ printSolution solutions
     T.putStrLn $
         "There were " <> T.pack (show (length solutions)) <>
-        " solutions in total."
+        " solutions in total, including rotations."
   where
     solutions = observeAll solution
 
