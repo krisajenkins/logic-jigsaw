@@ -3,9 +3,11 @@
 module Lib where
 
 import           Control.Monad.Logic
+import           Data.Monoid
 import           Data.Set            as Set
-import           Data.Text           as T (Text, pack)
-import           Data.Text.IO        as T
+import           Data.Text           (Text)
+import qualified Data.Text           as T
+import qualified Data.Text.IO        as T
 import           Pieces
 
 choices
@@ -131,7 +133,13 @@ printSolution :: Solution -> IO ()
 printSolution = mapM_ T.putStrLn . showSolution
 
 solve :: IO ()
-solve = printSolution (observe solution)
+solve = do
+    mapM_ printSolution solutions
+    T.putStrLn $
+        "There were " <> T.pack (show (length solutions)) <>
+        " solutions in total."
+  where
+    solutions = observeAll solution
 
 check :: IO ()
 check = print (length (observeAll solution))
