@@ -92,30 +92,22 @@ canConnect :: (Suit, Bool) -> (Suit, Bool) -> Bool
 canConnect (suitA, directionA) (suitB, directionB) =
     (suitA == suitB) && (directionA /= directionB)
 
+rotate :: Piece -> Piece
+rotate piece =
+    Piece
+    { index = index piece
+    , top = left piece
+    , right = top piece
+    , bottom = right piece
+    , left = bottom piece
+    }
+
 rotations :: Piece -> [Piece]
 rotations piece =
-        [ piece
-        , Piece
-          { index = index piece
-          , top = left piece
-          , right = top piece
-          , bottom = right piece
-          , left = bottom piece
-          }
-        , Piece
-          { index = index piece
-          , top = bottom piece
-          , right = left piece
-          , bottom = top piece
-          , left = right piece
-          }
-        , Piece
-          { index = index piece
-          , top = right piece
-          , right = top piece
-          , bottom = left piece
-          , left = bottom piece
-          }]
+    [ piece
+    , rotate $ piece
+    , rotate . rotate $ piece
+    , rotate . rotate . rotate $ piece]
 
 
 showSolution :: Solution -> [Text]
