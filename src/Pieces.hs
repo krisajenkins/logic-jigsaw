@@ -1,4 +1,9 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Pieces where
+
+import           Data.Text (Text)
+import qualified Data.Text as T
 
 data Suit
     = Club
@@ -9,11 +14,13 @@ data Suit
 
 data Piece = Piece
     { index  :: Int
-    , top    :: (Suit,Bool)
-    , right  :: (Suit,Bool)
-    , bottom :: (Suit,Bool)
-    , left   :: (Suit,Bool)
+    , top    :: (Suit, Bool)
+    , right  :: (Suit, Bool)
+    , bottom :: (Suit, Bool)
+    , left   :: (Suit, Bool)
     } deriving (Show, Eq, Ord)
+
+type Solution = ((Piece, Piece, Piece), (Piece, Piece, Piece), (Piece, Piece, Piece))
 
 pieces :: [Piece]
 pieces =
@@ -81,6 +88,79 @@ pieces =
       , left = (Club, False)
       }]
 
-connect :: (Suit,Bool) -> (Suit,Bool) -> Bool
-connect (suitA, directionA) (suitB, directionB) =
+canConnect :: (Suit, Bool) -> (Suit, Bool) -> Bool
+canConnect (suitA, directionA) (suitB, directionB) =
     (suitA == suitB) && (directionA /= directionB)
+
+rotations :: Piece -> [Piece]
+rotations piece =
+        [ piece
+        , Piece
+          { index = index piece
+          , top = left piece
+          , right = top piece
+          , bottom = right piece
+          , left = bottom piece
+          }
+        , Piece
+          { index = index piece
+          , top = bottom piece
+          , right = left piece
+          , bottom = top piece
+          , left = right piece
+          }
+        , Piece
+          { index = index piece
+          , top = right piece
+          , right = top piece
+          , bottom = left piece
+          , left = bottom piece
+          }]
+
+
+showSolution :: Solution -> [Text]
+showSolution (t, m, b) =
+    mconcat [["----"], showTriple t, showTriple m, showTriple b]
+
+showTriple :: (Piece, Piece, Piece) -> [Text]
+showTriple (tl, tm, tr) =
+    [ mconcat
+          [ " "
+          , suit (top tl)
+          , "  "
+          , " "
+          , suit (top tm)
+          , "  "
+          , " "
+          , suit (top tr)
+          , " "]
+    , mconcat
+          [ suit (left tl)
+          , idx (index tl)
+          , suit (right tl)
+          , " "
+          , suit (left tm)
+          , idx (index tm)
+          , suit (right tm)
+          , " "
+          , suit (left tr)
+          , idx (index tr)
+          , suit (right tr)
+          , " "]
+    , mconcat
+          [ " "
+          , suit (bottom tl)
+          , "  "
+          , " "
+          , suit (bottom tm)
+          , "  "
+          , " "
+          , suit (bottom tr)
+          , " "]
+    , ""]
+  where
+    idx = T.pack . show
+    suit (Heart, _) = "H"
+    suit (Spade, _) = "S"
+    suit (Club, _) = "C"
+    suit (Diamond, _) = "D"
