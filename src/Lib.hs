@@ -10,6 +10,11 @@ import qualified Data.Text           as T
 import qualified Data.Text.IO        as T
 import           Pieces
 
+countDistinct
+        :: Ord a
+        => [a] -> Int
+countDistinct = Set.size . Set.fromList
+
 choices
     :: MonadPlus m
     => [a] -> m a
@@ -59,11 +64,6 @@ solution = do
     doesConnect (right bm) (left br)
     guard (countDistinct [otl, otm, otr, oml, omm, omr, obl, obm, obr] == 9)
     return ((tl, tm, tr), (ml, mm, mr), (bl, bm, br))
-  where
-    countDistinct
-        :: Ord a
-        => [a] -> Int
-    countDistinct = Set.size . Set.fromList
 
 printSolution :: Solution -> IO ()
 printSolution = mapM_ T.putStrLn . showSolution
