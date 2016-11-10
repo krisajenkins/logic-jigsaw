@@ -2,8 +2,12 @@
 
 module Pieces where
 
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.String
+
+import           Data.Text   (Text)
+import qualified Data.Text   as T
+import           Formatting  ((%))
+import qualified Formatting  as F
 
 data Suit
     = Club
@@ -12,12 +16,14 @@ data Suit
     | Diamond
      deriving (Show, Eq, Ord)
 
+type Edge = (Suit, Bool)
+
 data Piece = Piece
     { index  :: Int
-    , top    :: (Suit, Bool)
-    , right  :: (Suit, Bool)
-    , bottom :: (Suit, Bool)
-    , left   :: (Suit, Bool)
+    , top    :: Edge
+    , right  :: Edge
+    , bottom :: Edge
+    , left   :: Edge
     } deriving (Show, Eq, Ord)
 
 type Solution = ((Piece, Piece, Piece), (Piece, Piece, Piece), (Piece, Piece, Piece))
@@ -88,7 +94,7 @@ pieces =
       , left = (Club, False)
       }]
 
-canConnect :: (Suit, Bool) -> (Suit, Bool) -> Bool
+canConnect :: Edge -> Edge -> Bool
 canConnect (suitA, directionA) (suitB, directionB) =
     (suitA == suitB) && (directionA /= directionB)
 
@@ -109,50 +115,47 @@ rotations piece =
     , rotate . rotate $ piece
     , rotate . rotate . rotate $ piece]
 
-
 showSolution :: Solution -> [Text]
 showSolution (t, m, b) =
     mconcat [["----"], showTriple t, showTriple m, showTriple b]
 
 showTriple :: (Piece, Piece, Piece) -> [Text]
 showTriple (tl, tm, tr) =
-    [ mconcat
-          [ " "
-          , suit (top tl)
-          , "  "
-          , " "
-          , suit (top tm)
-          , "  "
-          , " "
-          , suit (top tr)
-          , " "]
-    , mconcat
-          [ suit (left tl)
-          , idx (index tl)
-          , suit (right tl)
-          , " "
-          , suit (left tm)
-          , idx (index tm)
-          , suit (right tm)
-          , " "
-          , suit (left tr)
-          , idx (index tr)
-          , suit (right tr)
-          , " "]
-    , mconcat
-          [ " "
-          , suit (bottom tl)
-          , "  "
-          , " "
-          , suit (bottom tm)
-          , "  "
-          , " "
-          , suit (bottom tr)
-          , " "]
+    [ F.sformat edgesFormat (top tl) (top tm) (top tr)
+    , F.sformat
+          centresFormat
+          (left tl)
+          (index tl)
+          (right tl)
+          (left tm)
+          (index tm)
+          (right tm)
+          (left tr)
+          (index tr)
+          (right tr)
+    , F.sformat edgesFormat (bottom tl) (bottom tm) (bottom tr)
     , ""]
-  where
-    idx = T.pack . show
-    suit (Heart, _) = "H"
-    suit (Spade, _) = "S"
-    suit (Club, _) = "C"
-    suit (Diamond, _) = "D"
+
+edgeFormat :: F.Format r (Edge -> r)
+edgeFormat = " " % formatEdge % " "
+
+edgesFormat :: F.Format r (Edge -> Edge -> Edge -> r)
+edgesFormat = edgeFormat % " " % edgeFormat % " " % edgeFormat
+
+centreFormat :: F.Format r (Edge -> Int -> Edge -> r)
+centreFormat = formatEdge % F.int % formatEdge
+
+centresFormat
+    :: F.Format r (Edge -> Int -> Edge -> Edge -> Int -> Edge -> Edge -> Int -> Edge -> r)
+centresFormat = centreFormat % " " % centreFormat % " " % centreFormat
+
+formatEdge :: F.Format r (Edge -> r)
+formatEdge = F.later showEdge
+
+showEdge
+    :: IsString a
+    => Edge -> a
+showEdge (Heart, _) = "H"
+showEdge (Spade, _) = "S"
+showEdge (Club, _) = "C"
+showEdge (Diamond, _) = "D"
