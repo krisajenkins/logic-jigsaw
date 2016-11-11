@@ -8,8 +8,8 @@ On my laptop it solves and prints in about 0.09s, which isn't too shabby!
 
 ## Puzzle
 
-Put these tiles together in a 3x3 grid. There is one solution (or 4,
-if you include rotating the whole thing).
+Put these tiles together in a 3x3 grid. There is one solution. (Well, four
+if you allow rotations.)
 
 ![jigsaw puzzle](puzzle.jpeg)
 
